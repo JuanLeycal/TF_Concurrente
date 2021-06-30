@@ -1,6 +1,7 @@
 package kmeans
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -29,10 +30,32 @@ func KMeansInit(nList []Node, nClusters int, maxIter int) (bool, []Node) {
 		copy(nCentroids[i], nList[randN.Intn(lnList)])
 	}
 
+	//Aquí iria la primera codificación s tring de los nodos
+	// la función KmeansTraining llamaría a sólo un String
+	var sNode [][]string
+
+	for i := 0; i < len(nList); i++ {
+		var aux []string
+		for j := 0; j < len(nList[i]); j++ {
+			s := fmt.Sprintf("%f", nList[i][j])
+			// s = s + "basura"
+			// fmt.Println(s)
+			aux = append(aux, s)
+		}
+		sNode = append(sNode, aux)
+		// fmt.Println(sNode[i])
+	}
+
+	//fmt.Println(sNode)
+
+	//return KMeansTraining(nodeStrings)
 	return KMeansTraining(nList, nCentroids, maxIter)
 }
 
 func KMeansTraining(nList []Node, nCentroids []Node, maxIter int) (bool, []Node) {
+	//Aquí se clerarían las variables usadas sólo en la función.
+	//Continuación iria la decodificación y divisón del string para asignarlo a sus variables
+
 	//Training arc
 	canMove := true
 	for i := 0; i < maxIter && canMove; i++ {
@@ -50,5 +73,11 @@ func KMeansTraining(nList []Node, nCentroids []Node, maxIter int) (bool, []Node)
 			}
 		}
 	}
+	//codificar again en String los nodos
 	return true, nCentroids
+	//return false, KMeansTraining(nodeStrings)
+}
+
+func main() {
+
 }
