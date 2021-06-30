@@ -46,21 +46,20 @@ func KMeansInit(nList []Node, nClusters int, maxIter int) (bool, []Node) {
 			if j == len(nList[i])-1 {
 				aux = append(aux, s+",")
 			} else {
-				aux = append(aux, s)
+				aux = append(aux, s+"-")
 			}
 
 		}
-		aux = aux
 		sNode = append(sNode, aux)
 		// fmt.Println(sNode[i])
 	}
 	for i := 0; i < len(sNode); i++ {
 		// for j := 0; j < len(sNode[i]); j++ {
-		pog = append(pog, strings.Join(sNode[i], " "))
+		pog = append(pog, strings.Join(sNode[i], ""))
 		// pog[i] = strings.Join(sNode[i], " ")
 		//}
 	}
-	sLong := strings.Join(pog, " ")
+	sLong := strings.Join(pog, "")
 	//fmt.Println(sNode)
 	//fmt.Println(pog)
 	t := strconv.Itoa(nClusters)
@@ -68,7 +67,50 @@ func KMeansInit(nList []Node, nClusters int, maxIter int) (bool, []Node) {
 
 	sLong = sLong + ";" + t + ";" + p
 
-	fmt.Println(sLong)
+	//fmt.Println(sLong)
+	deConvert := strings.Split(sLong, ";")
+	//fmt.Println(deConvert)
+
+	//fmt.Println(len(deConvert))
+	deNode := strings.Split(deConvert[0], ",")
+	fmt.Println(nList[0])
+	fmt.Println(deNode[0])
+	newNCluster, _ := strconv.Atoi(deConvert[1])
+	newNIter, _ := strconv.Atoi(deConvert[2])
+
+	var example [][]string
+	for i := 0; i < len(deNode); i++ {
+		s := strings.Split(deNode[i], "-")
+		example = append(example, s)
+	}
+	//fmt.Println(example)
+
+	var recon [][]float64
+
+	for i := 0; i < len(example)-1; i++ {
+		var aux []float64
+		if len(example[i]) != 0 {
+			for j := 0; j < len(example[i]); j++ {
+				f, _ := strconv.ParseFloat(example[i][j], 32)
+				aux = append(aux, f)
+
+			}
+		}
+		recon = append(recon, aux)
+		// fmt.Println(sNode[i])
+	}
+	fmt.Println("Original array")
+	fmt.Println(nList)
+	fmt.Println("Original number of clusters")
+	fmt.Println(nClusters)
+	fmt.Println("Original number of iteration")
+	fmt.Println(maxIter)
+	fmt.Println("Coded/Decoded array")
+	fmt.Println(recon)
+	fmt.Println("Coded/Decoded number of clusters")
+	fmt.Println(newNCluster)
+	fmt.Println("Coded/Decoded number of iteration")
+	fmt.Println(newNIter)
 
 	//return KMeansTraining(nodeStrings)
 	return KMeansTraining(nList, nCentroids, maxIter)
@@ -98,8 +140,4 @@ func KMeansTraining(nList []Node, nCentroids []Node, maxIter int) (bool, []Node)
 	//codificar again en String los nodos
 	return true, nCentroids
 	//return false, KMeansTraining(nodeStrings)
-}
-
-func main() {
-
 }
