@@ -58,7 +58,7 @@ func populateData() {
 }
 
 func runKMeans(kClusters int) {
-	if success, nCentroids := kmeans.KMeans(nCiudadanos, kClusters, 50); success {
+	if success, nCentroids := kmeans.KMeansInit(nCiudadanos, kClusters, 50); success {
 		fmt.Println("Centroids:")
 		for _, centroid := range nCentroids {
 			fmt.Println(centroid)
