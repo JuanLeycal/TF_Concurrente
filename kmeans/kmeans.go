@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func KMeans(nList []Node, nClusters int, maxIter int) (bool, []Node) {
+func KMeansInit(nList []Node, nClusters int, maxIter int) (bool, []Node) {
 	lnList := len(nList)
 	if lnList < nClusters {
 		return false, nil
@@ -29,6 +29,10 @@ func KMeans(nList []Node, nClusters int, maxIter int) (bool, []Node) {
 		copy(nCentroids[i], nList[randN.Intn(lnList)])
 	}
 
+	return KMeansTraining(nList, nCentroids, maxIter)
+}
+
+func KMeansTraining(nList []Node, nCentroids []Node, maxIter int) (bool, []Node) {
 	//Training arc
 	canMove := true
 	for i := 0; i < maxIter && canMove; i++ {
