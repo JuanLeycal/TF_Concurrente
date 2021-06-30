@@ -3,6 +3,8 @@ package kmeans
 import (
 	"fmt"
 	"math/rand"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -33,6 +35,7 @@ func KMeansInit(nList []Node, nClusters int, maxIter int) (bool, []Node) {
 	//Aquí iria la primera codificación s tring de los nodos
 	// la función KmeansTraining llamaría a sólo un String
 	var sNode [][]string
+	var pog []string
 
 	for i := 0; i < len(nList); i++ {
 		var aux []string
@@ -40,13 +43,32 @@ func KMeansInit(nList []Node, nClusters int, maxIter int) (bool, []Node) {
 			s := fmt.Sprintf("%f", nList[i][j])
 			// s = s + "basura"
 			// fmt.Println(s)
-			aux = append(aux, s)
+			if j == len(nList[i])-1 {
+				aux = append(aux, s+",")
+			} else {
+				aux = append(aux, s)
+			}
+
 		}
+		aux = aux
 		sNode = append(sNode, aux)
 		// fmt.Println(sNode[i])
 	}
-
+	for i := 0; i < len(sNode); i++ {
+		// for j := 0; j < len(sNode[i]); j++ {
+		pog = append(pog, strings.Join(sNode[i], " "))
+		// pog[i] = strings.Join(sNode[i], " ")
+		//}
+	}
+	sLong := strings.Join(pog, " ")
 	//fmt.Println(sNode)
+	//fmt.Println(pog)
+	t := strconv.Itoa(nClusters)
+	p := strconv.Itoa(maxIter)
+
+	sLong = sLong + ";" + t + ";" + p
+
+	fmt.Println(sLong)
 
 	//return KMeansTraining(nodeStrings)
 	return KMeansTraining(nList, nCentroids, maxIter)
