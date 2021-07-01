@@ -27,6 +27,7 @@ func StartKMeans(w http.ResponseWriter, r *http.Request) {
 	iterations := vars["iterations"]
 	nIterations, _ := strconv.Atoi(iterations)
 	enviar(nIterations)
+	// el fmt.Fprintf se ejecutaria cuando llegue el response del ultimo nodo
 	fmt.Fprintf(w, "TOMA TU RESPUESTA en %d iteraciones", nIterations)
 }
 
