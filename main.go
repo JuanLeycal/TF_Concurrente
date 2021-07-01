@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
@@ -8,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
@@ -18,6 +20,7 @@ import (
 var data = [][]string{}
 var listaCiudadano = []model.Ciudadano{}
 var nCiudadanos []kmeans.Node = []kmeans.Node{}
+var remotehost string
 
 func readCsv(filePath string) [][]string {
 	f, err := os.Open(filePath)
@@ -42,11 +45,11 @@ func populateData() {
 		e, _ := strconv.Atoi(row[4])
 		object := model.Ciudadano{
 			ID:                     i,
-			ESTRATO_SOCIOECONOMICO: float32(a),
-			SEGURIDAD_NOCTURNA:     float32(b),
-			GRUPOS_EDAD:            float32(c),
-			CONFIANZA_POLICIA:      float32(d),
-			PRONTO_DELITO:          float32(e),
+			ESTRATO_SOCIOECONOMICO: float64(a),
+			SEGURIDAD_NOCTURNA:     float64(b),
+			GRUPOS_EDAD:            float64(c),
+			CONFIANZA_POLICIA:      float64(d),
+			PRONTO_DELITO:          float64(e),
 		}
 		listaCiudadano = append(listaCiudadano, object)
 		nNode := kmeans.Node{}
@@ -59,6 +62,7 @@ func populateData() {
 
 func runKMeans(kClusters int) {
 	if success, nCentroids := kmeans.KMeansInit(nCiudadanos, kClusters, 50); success {
+		//esta logica deberia ir en el listener del start
 		fmt.Println("Centroids:")
 		for _, centroid := range nCentroids {
 			fmt.Println(centroid)
@@ -93,9 +97,14 @@ func main() {
 	handler := c.Handler(r)
 
 	data = readCsv("./DatasetSelectivo.csv")
-	//fmt.Println(data)
 
 	populateData()
+
+	bufferIn := bufio.NewReader(os.Stdin)
+	fmt.Print("Ingrese la IP remota: ")
+	ip, _ := bufferIn.ReadString('\n')
+	ip = strings.TrimSpace(ip)
+	remotehost = fmt.Sprintf("%s:%d", ip, 8002)
 
 	r.HandleFunc("/{kClusters}", HomeHandler)
 	log.Fatal(http.ListenAndServe(":3000", handler))
