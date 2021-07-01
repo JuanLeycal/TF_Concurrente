@@ -50,7 +50,7 @@ func populateData() {
 		}
 		listaCiudadano = append(listaCiudadano, object)
 		nNode := kmeans.Node{}
-		nNode = append(nNode, float32(a), float32(b), float32(c), float32(d), float32(e))
+		nNode = append(nNode, float64(a), float64(b), float64(c), float64(d), float64(e))
 		nCiudadanos = append(nCiudadanos, nNode)
 	}
 	listaCiudadano = listaCiudadano[1:]

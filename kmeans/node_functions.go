@@ -2,7 +2,7 @@ package kmeans
 
 import "math"
 
-type Node []float32
+type Node []float64
 
 func meanNode(nList []Node) Node {
 	mNode := make(Node, len(nList[0]))
@@ -12,7 +12,7 @@ func meanNode(nList []Node) Node {
 		}
 	}
 	for i, v := range mNode {
-		mNode[i] = v / float32(len(nList))
+		mNode[i] = v / float64(len(nList))
 	}
 	return mNode
 }
@@ -39,20 +39,20 @@ func Nearest(n Node, nList []Node) int {
 	return minI
 }
 
-func eucDistance(n1, n2 Node) float32 {
+func eucDistance(n1, n2 Node) float64 {
 	ln1 := len(n1)
 	square := make(Node, ln1, ln1)
 	cont := make(chan int)
 	for i := range n1 {
 		go func(i int) {
 			diff := n1[i] - n2[i]
-			square[i] = float32(math.Pow(float64(diff), 2))
+			square[i] = float64(math.Pow(float64(diff), 2))
 			cont <- 1
 		}(i)
 	}
 	wait(cont, square)
 
-	sum := float32(0)
+	sum := float64(0)
 	for _, v := range square {
 		sum += v
 	}
