@@ -8,6 +8,147 @@ import (
 	"time"
 )
 
+func toString(nList []Node) string {
+	var sNode [][]string
+	var pog []string
+
+	for i := 0; i < len(nList); i++ {
+		var aux []string
+		for j := 0; j < len(nList[i]); j++ {
+			s := fmt.Sprintf("%f", nList[i][j])
+			if j == len(nList[i])-1 {
+				aux = append(aux, s+",")
+			} else {
+				aux = append(aux, s+"-")
+			}
+
+		}
+		sNode = append(sNode, aux)
+	}
+	for i := 0; i < len(sNode); i++ {
+		pog = append(pog, strings.Join(sNode[i], ""))
+	}
+	sLong := strings.Join(pog, "")
+
+	return sLong
+}
+func toInt(value int) string {
+	sNum := strconv.Itoa(value)
+
+	return sNum
+}
+
+func decodeNode(array []string) (nNode [][]float64) {
+
+	var example [][]string
+	for i := 0; i < len(array); i++ {
+		s := strings.Split(array[i], "-")
+		example = append(example, s)
+	}
+	for i := 0; i < len(example)-1; i++ {
+		var aux []float64
+		if len(example[i]) != 0 {
+			for j := 0; j < len(example[i]); j++ {
+				f, _ := strconv.ParseFloat(example[i][j], 32)
+				aux = append(aux, f)
+
+			}
+		}
+		nNode = append(nNode, aux)
+	}
+
+	return
+}
+
+func firstEcode(nList []Node, nClusters int, maxIter int) string {
+
+	sLong := toString(nList)
+
+	t := toInt(nClusters)
+	p := toInt(maxIter)
+
+	sLong = sLong + ";" + t + ";" + p
+
+	return sLong
+}
+func trainingEncode(nList []Node, nCentroids []Node, maxIter int) string {
+	sLong := toString(nList)
+	sCentroid := toString(nCentroids)
+	p := toInt(maxIter)
+
+	sLong = sLong + ";" + sCentroid + ";" + p
+
+	return sLong
+}
+
+func firstDecode(sLong string) (recon [][]float64, newNCluster int, newNIter int) {
+
+	deConvert := strings.Split(sLong, ";")
+
+	deNode := strings.Split(deConvert[0], ",")
+
+	fmt.Println(deNode[0])
+
+	recon = decodeNode(deNode)
+
+	newNCluster, _ = strconv.Atoi(deConvert[1])
+	newNIter, _ = strconv.Atoi(deConvert[2])
+
+	// var example [][]string
+	// for i := 0; i < len(deNode); i++ {
+	// 	s := strings.Split(deNode[i], "-")
+	// 	example = append(example, s)
+	// }
+
+	// for i := 0; i < len(example)-1; i++ {
+	// 	var aux []float64
+	// 	if len(example[i]) != 0 {
+	// 		for j := 0; j < len(example[i]); j++ {
+	// 			f, _ := strconv.ParseFloat(example[i][j], 32)
+	// 			aux = append(aux, f)
+
+	// 		}
+	// 	}
+	// 	recon = append(recon, aux)
+	// }
+
+	return
+}
+
+func trainingDecode(sLong string) (recon [][]float64, newNCluster [][]float64, newNIter int) {
+
+	deConvert := strings.Split(sLong, ";")
+
+	deNode := strings.Split(deConvert[0], ",")
+
+	deCluster := strings.Split(deConvert[1], ",")
+
+	fmt.Println(deNode[1])
+
+	// var example [][]string
+	// for i := 0; i < len(deNode); i++ {
+	// 	s := strings.Split(deNode[i], "-")
+	// 	example = append(example, s)
+	// }
+
+	// for i := 0; i < len(example)-1; i++ {
+	// 	var aux []float64
+	// 	if len(example[i]) != 0 {
+	// 		for j := 0; j < len(example[i]); j++ {
+	// 			f, _ := strconv.ParseFloat(example[i][j], 32)
+	// 			aux = append(aux, f)
+
+	// 		}
+	// 	}
+	// 	recon = append(recon, aux)
+	// }
+	recon = decodeNode(deNode)
+	newNCluster = decodeNode(deCluster)
+	newNIter, _ = strconv.Atoi(deConvert[2])
+
+	return
+}
+
 func KMeansInit(nList []Node, nClusters int, maxIter int) (bool, []Node) {
 	lnList := len(nList)
 	if lnList < nClusters {
@@ -33,84 +174,24 @@ func KMeansInit(nList []Node, nClusters int, maxIter int) (bool, []Node) {
 	}
 
 	//Aquí iria la primera codificación s tring de los nodos
+	sLong := firstEcode(nList, nClusters, maxIter)
 	// la función KmeansTraining llamaría a sólo un String
-	var sNode [][]string
-	var pog []string
+	a, b, c := firstDecode(sLong)
 
-	for i := 0; i < len(nList); i++ {
-		var aux []string
-		for j := 0; j < len(nList[i]); j++ {
-			s := fmt.Sprintf("%f", nList[i][j])
-			// s = s + "basura"
-			// fmt.Println(s)
-			if j == len(nList[i])-1 {
-				aux = append(aux, s+",")
-			} else {
-				aux = append(aux, s+"-")
-			}
-
-		}
-		sNode = append(sNode, aux)
-		// fmt.Println(sNode[i])
-	}
-	for i := 0; i < len(sNode); i++ {
-		// for j := 0; j < len(sNode[i]); j++ {
-		pog = append(pog, strings.Join(sNode[i], ""))
-		// pog[i] = strings.Join(sNode[i], " ")
-		//}
-	}
-	sLong := strings.Join(pog, "")
-	//fmt.Println(sNode)
-	//fmt.Println(pog)
-	t := strconv.Itoa(nClusters)
-	p := strconv.Itoa(maxIter)
-
-	sLong = sLong + ";" + t + ";" + p
-
-	//fmt.Println(sLong)
-	deConvert := strings.Split(sLong, ";")
-	//fmt.Println(deConvert)
-
-	//fmt.Println(len(deConvert))
-	deNode := strings.Split(deConvert[0], ",")
-	fmt.Println(nList[0])
-	fmt.Println(deNode[0])
-	newNCluster, _ := strconv.Atoi(deConvert[1])
-	newNIter, _ := strconv.Atoi(deConvert[2])
-
-	var example [][]string
-	for i := 0; i < len(deNode); i++ {
-		s := strings.Split(deNode[i], "-")
-		example = append(example, s)
-	}
-	//fmt.Println(example)
-
-	var recon [][]float64
-
-	for i := 0; i < len(example)-1; i++ {
-		var aux []float64
-		if len(example[i]) != 0 {
-			for j := 0; j < len(example[i]); j++ {
-				f, _ := strconv.ParseFloat(example[i][j], 32)
-				aux = append(aux, f)
-
-			}
-		}
-		recon = append(recon, aux)
-		// fmt.Println(sNode[i])
-	}
 	fmt.Println("Original array")
 	fmt.Println(nList)
 	fmt.Println("Original number of clusters")
 	fmt.Println(nClusters)
 	fmt.Println("Original number of iteration")
 	fmt.Println(maxIter)
+	fmt.Println("array coded")
+	fmt.Println(sLong)
 	fmt.Println("Coded/Decoded array")
-	fmt.Println(recon)
+	fmt.Println(a)
 	fmt.Println("Coded/Decoded number of clusters")
-	fmt.Println(newNCluster)
+	fmt.Println(b)
 	fmt.Println("Coded/Decoded number of iteration")
-	fmt.Println(newNIter)
+	fmt.Println(c)
 
 	//return KMeansTraining(nodeStrings)
 	return KMeansTraining(nList, nCentroids, maxIter)
@@ -119,6 +200,12 @@ func KMeansInit(nList []Node, nClusters int, maxIter int) (bool, []Node) {
 func KMeansTraining(nList []Node, nCentroids []Node, maxIter int) (bool, []Node) {
 	//Aquí se clerarían las variables usadas sólo en la función.
 	//Continuación iria la decodificación y divisón del string para asignarlo a sus variables
+
+	sTraining := trainingEncode(nList, nCentroids, maxIter)
+	fmt.Println(sTraining)
+	_, b, _ := trainingDecode(sTraining)
+	fmt.Println("Centroides decodeados")
+	fmt.Println(b)
 
 	//Training arc
 	canMove := true
