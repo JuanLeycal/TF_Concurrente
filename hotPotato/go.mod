@@ -1,5 +1,4 @@
 module github.com/JuanLeycal/TF_Concurrente/hotPotato
-
 go 1.16
 
 require (
