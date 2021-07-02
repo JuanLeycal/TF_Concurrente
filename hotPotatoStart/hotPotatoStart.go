@@ -11,15 +11,30 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
-	"github.com/rs/cors"
 )
 
 var remotehost string
 
+func wait() string {
+	fmt.Printf("ESTOY ESPERANDO A QUE ME LLAME LA ULTIMA VM")
+	direccionIP_API := localAddress()
+	hostlocal := fmt.Sprintf("%s:%d", direccionIP_API, 8000)
+	ln, _ := net.Listen("tcp", hostlocal)
+	defer ln.Close()
+	conn, _ := ln.Accept()
+	bufferIn := bufio.NewReader(conn)
+	load, _ := bufferIn.ReadString('\n')
+	load = strings.TrimSpace(load)
+	fmt.Printf("Llegó la carga al local!!! :) : %s\n", load)
+	return load
+}
+
 func enviar(num int) {
+	direccionIP_API := localAddress()
+	fmt.Println(direccionIP_API)
 	conn, _ := net.Dial("tcp", remotehost)
 	defer conn.Close()
-	fmt.Fprintf(conn, "%d,%d\n", num, num)
+	fmt.Fprintf(conn, "%d,%d,%s\n", num, num, direccionIP_API)
 }
 
 func StartKMeans(w http.ResponseWriter, r *http.Request) {
@@ -27,8 +42,8 @@ func StartKMeans(w http.ResponseWriter, r *http.Request) {
 	iterations := vars["iterations"]
 	nIterations, _ := strconv.Atoi(iterations)
 	enviar(nIterations)
-	// el fmt.Fprintf se ejecutaria cuando llegue el response del ultimo nodo
-	fmt.Fprintf(w, "TOMA TU RESPUESTA en %d iteraciones", nIterations)
+	response := wait()
+	fmt.Fprintf(w, "PINGA %s", response)
 }
 
 func main() {
@@ -38,12 +53,33 @@ func main() {
 	ip = strings.TrimSpace(ip)
 	remotehost = fmt.Sprintf("%s:%d", ip, 8002)
 	router := mux.NewRouter().StrictSlash(true)
-	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowCredentials: true,
-	})
-
-	handler := c.Handler(router)
 	router.HandleFunc("/kmeans/{iterations}", StartKMeans)
-	log.Fatal(http.ListenAndServe(":1234", handler))
+	log.Fatal(http.ListenAndServe(":1234", router))
+}
+
+func localAddress() string {
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		log.Print(fmt.Errorf("localAddress: %v\n", err.Error()))
+		return "127.0.0.1"
+	}
+	for _, oiface := range ifaces {
+		if strings.HasPrefix(oiface.Name, "Wi-Fi") {
+			addrs, err := oiface.Addrs()
+			if err != nil {
+				log.Print(fmt.Errorf("localAddress: %v\n", err.Error()))
+				continue
+			}
+			for _, dir := range addrs {
+				switch d := dir.(type) {
+				case *net.IPNet:
+					if strings.HasPrefix(d.IP.String(), "192") {
+						return d.IP.String()
+					}
+
+				}
+			}
+		}
+	}
+	return "127.0.0.1"
 }
