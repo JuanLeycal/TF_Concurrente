@@ -10,6 +10,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/JuanLeycal/TF_Concurrente/hotPotato/kmeans"
 )
 
 var bitacora []string //Ips de los nodos de la red
@@ -87,24 +89,24 @@ func AtenderSolicitudRegistro() {
 	}
 }
 
-func EnviarCargaSgteNodo(nIteraciones int, nActual int, IP_API string) {
+func EnviarCargaSgteNodo(encodedStr string, IP_API string, nIteraciones int, nActual int) {
 	// enviar carga
 	indice := rand.Intn(len(bitacora)) // selecciono de manera aleatoria
 	hostremoto := fmt.Sprintf("%s:%d", bitacora[indice], puerto_procesoHP)
 	fmt.Printf("Enviando la carga %d al nodo %s\n", nActual, bitacora[indice])
 	conn, _ := net.Dial("tcp", hostremoto)
 	defer conn.Close()
-	fmt.Fprintf(conn, "%d,%d,%s\n", nIteraciones, nActual, IP_API)
+	//fmt.Fprintf(conn, "%d,%d,%s\n", nIteraciones, nActual, IP_API)
+	fmt.Fprintf(conn, "%s/%s/%d/%d", encodedStr, IP_API, nIteraciones, nActual)
 }
 
-func EnviarCargaFinal(nIteraciones int, nActual int, IP_API string) {
+func EnviarCargaFinal(encodedStr string, IP_API string, nIteraciones int, nActual int) {
 	// enviar carga
 	hostremoto := fmt.Sprintf("%s:%d", IP_API, puerto_procesoHP)
 	fmt.Printf("Enviando la carga %d de vuelta al API %s\n", nActual, IP_API)
 	conn, _ := net.Dial("tcp", hostremoto)
 	defer conn.Close()
-	fmt.Fprintf(conn, "%d,%d,%s\n", nIteraciones, nActual, IP_API)
-
+	fmt.Fprintf(conn, encodedStr)
 }
 
 func ManejadorServicioHP(conn net.Conn) {
@@ -112,21 +114,25 @@ func ManejadorServicioHP(conn net.Conn) {
 	// leer la carga que llega al nodo
 	bufferIn := bufio.NewReader(conn)
 	load, _ := bufferIn.ReadString('\n')
-	fmt.Printf("Llegó la carga: %s\n", load)
+	//fmt.Printf("Llegó la carga: %s\n", load)
 	load = strings.TrimSpace(load)
-	fmt.Printf("Llegó la carga: %s\n", load)
-	s := strings.Split(load, ",")
-	nIteracionesString := s[0]
-	nActualString := s[1]
-	IP_API := s[len(s)-1]
-	nIteraciones, _ := strconv.Atoi(nIteracionesString)
-	nActual, _ := strconv.Atoi(nActualString)
+	//fmt.Printf("Llegó la carga: %s\n", load)
+	s := strings.Split(load, "/")
+	encodedStr := s[0]
+	IP_API := s[1]
+	nIteraciones, _ := strconv.Atoi(s[2]) //total de iteraciones
+	nActual, _ := strconv.Atoi(s[3])      //numero actual de iteraciones
 	fmt.Printf("Total de Iteraciones: %d. Iteracion Actual: %d, IP API:%s\n", nIteraciones, nActual, IP_API)
+	//
+	nList, nCentroids, maxIter := kmeans.TrainingDecode(encodedStr)
+	nList, nCentroids, maxIter = kmeans.KMeansTraining(nList, nCentroids, maxIter)
+	encodedStr = kmeans.TrainingEncode(nList, nCentroids, maxIter)
+
 	if nActual != 0 {
-		EnviarCargaSgteNodo(nIteraciones, nActual-1, IP_API)
+		EnviarCargaSgteNodo(encodedStr, IP_API, nIteraciones, nActual-1)
 	} else {
 		fmt.Println("Se terminó el entrenamiento del algoritmo")
-		EnviarCargaFinal(nIteraciones, nActual-1, IP_API)
+		EnviarCargaFinal(encodedStr, IP_API, nIteraciones, nActual)
 	}
 
 }
