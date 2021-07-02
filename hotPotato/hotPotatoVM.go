@@ -97,7 +97,7 @@ func EnviarCargaSgteNodo(encodedStr string, IP_API string, nIteraciones int, nAc
 	conn, _ := net.Dial("tcp", hostremoto)
 	defer conn.Close()
 	//fmt.Fprintf(conn, "%d,%d,%s\n", nIteraciones, nActual, IP_API)
-	fmt.Fprintf(conn, "%s, %s, %d, %d", encodedStr, IP_API, nIteraciones, nActual)
+	fmt.Fprintf(conn, "%s/%s/%d/%d", encodedStr, IP_API, nIteraciones, nActual)
 }
 
 func EnviarCargaFinal(encodedStr string, IP_API string, nIteraciones int, nActual int) {
@@ -114,10 +114,10 @@ func ManejadorServicioHP(conn net.Conn) {
 	// leer la carga que llega al nodo
 	bufferIn := bufio.NewReader(conn)
 	load, _ := bufferIn.ReadString('\n')
-	fmt.Printf("Llegó la carga: %s\n", load)
+	//fmt.Printf("Llegó la carga: %s\n", load)
 	load = strings.TrimSpace(load)
-	fmt.Printf("Llegó la carga: %s\n", load)
-	s := strings.Split(load, ",")
+	//fmt.Printf("Llegó la carga: %s\n", load)
+	s := strings.Split(load, "/")
 	encodedStr := s[0]
 	IP_API := s[1]
 	nIteraciones, _ := strconv.Atoi(s[2]) //total de iteraciones
