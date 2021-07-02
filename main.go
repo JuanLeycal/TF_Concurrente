@@ -37,8 +37,25 @@ func readCsv(filePath string) [][]string {
 	return records
 }
 
+func readCSVFromUrl(url string) ([][]string, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	reader := csv.NewReader(resp.Body)
+	data, err := reader.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
 func populateData() {
 	for i, row := range data {
+		fmt.Println(row)
 		a, _ := strconv.Atoi(row[0])
 		b, _ := strconv.Atoi(row[1])
 		c, _ := strconv.Atoi(row[2])
@@ -158,7 +175,10 @@ func main() {
 	})
 	handler := c.Handler(r)
 
-	data = readCsv("./DatasetSelectivo.csv")
+	//data = readCsv("./DatasetSelectivo.csv")
+
+	url := "https://raw.githubusercontent.com/JuanLeycal/TF_Concurrente/develop/DatasetSelectivo.csv"
+	data, _ = readCSVFromUrl(url)
 
 	populateData()
 
