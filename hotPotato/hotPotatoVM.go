@@ -87,36 +87,46 @@ func AtenderSolicitudRegistro() {
 	}
 }
 
-func EnviarCargaSgteNodo(nIteraciones int, nActual int) {
+func EnviarCargaSgteNodo(nIteraciones int, nActual int, IP_API string) {
 	// enviar carga
 	indice := rand.Intn(len(bitacora)) // selecciono de manera aleatoria
 	hostremoto := fmt.Sprintf("%s:%d", bitacora[indice], puerto_procesoHP)
 	fmt.Printf("Enviando la carga %d al nodo %s\n", nActual, bitacora[indice])
 	conn, _ := net.Dial("tcp", hostremoto)
 	defer conn.Close()
-	fmt.Fprintf(conn, "%d,%d\n", nIteraciones, nActual)
+	fmt.Fprintf(conn, "%d,%d,%s\n", nIteraciones, nActual, IP_API)
+}
+
+func EnviarCargaFinal(nIteraciones int, nActual int, IP_API string) {
+	// enviar carga
+	hostremoto := fmt.Sprintf("%s:%d", IP_API, puerto_procesoHP)
+	fmt.Printf("Enviando la carga %d de vuelta al API %s\n", nActual, IP_API)
+	conn, _ := net.Dial("tcp", hostremoto)
+	defer conn.Close()
+	fmt.Fprintf(conn, "%d,%d,%s\n", nIteraciones, nActual, IP_API)
 
 }
+
 func ManejadorServicioHP(conn net.Conn) {
 	defer conn.Close()
 	// leer la carga que llega al nodo
 	bufferIn := bufio.NewReader(conn)
 	load, _ := bufferIn.ReadString('\n')
+	fmt.Printf("Llegó la carga: %s\n", load)
 	load = strings.TrimSpace(load)
 	fmt.Printf("Llegó la carga: %s\n", load)
 	s := strings.Split(load, ",")
 	nIteracionesString := s[0]
 	nActualString := s[1]
+	IP_API := s[len(s)-1]
 	nIteraciones, _ := strconv.Atoi(nIteracionesString)
 	nActual, _ := strconv.Atoi(nActualString)
-	fmt.Printf("Total de Iteraciones: %d. Iteracion Actual: %d\n", nIteraciones, nActual)
-	if nActual == nIteraciones {
-		fmt.Println("Inicializamos el algoritmo")
-		EnviarCargaSgteNodo(nIteraciones, nActual-1)
-	} else if nActual != nIteraciones && nActual != 0 {
-		EnviarCargaSgteNodo(nIteraciones, nActual-1)
+	fmt.Printf("Total de Iteraciones: %d. Iteracion Actual: %d, IP API:%s\n", nIteraciones, nActual, IP_API)
+	if nActual != 0 {
+		EnviarCargaSgteNodo(nIteraciones, nActual-1, IP_API)
 	} else {
-		fmt.Println("LLegó a su fin, proceso terminado!!!!")
+		fmt.Println("Se terminó el entrenamiento del algoritmo")
+		EnviarCargaFinal(nIteraciones, nActual-1, IP_API)
 	}
 
 }
@@ -153,7 +163,7 @@ func localAddress() string {
 		return "127.0.0.1"
 	}
 	for _, oiface := range ifaces {
-		if strings.HasPrefix(oiface.Name, "Wi-Fi") {
+		if strings.HasPrefix(oiface.Name, "ens33") {
 			addrs, err := oiface.Addrs()
 			if err != nil {
 				log.Print(fmt.Errorf("localAddress: %v\n", err.Error()))
