@@ -18,7 +18,7 @@ var remotehost string
 func wait() string {
 	fmt.Printf("ESTOY ESPERANDO A QUE ME LLAME LA ULTIMA VM")
 	direccionIP_API := localAddress()
-	hostlocal := fmt.Sprintf("%s:%d", direccionIP_API, 8000)
+	hostlocal := fmt.Sprintf("%s:%d", direccionIP_API, 8002)
 	ln, _ := net.Listen("tcp", hostlocal)
 	defer ln.Close()
 	conn, _ := ln.Accept()
@@ -43,7 +43,7 @@ func StartKMeans(w http.ResponseWriter, r *http.Request) {
 	nIterations, _ := strconv.Atoi(iterations)
 	enviar(nIterations)
 	response := wait()
-	fmt.Fprintf(w, "PINGA %s", response)
+	fmt.Fprintf(w, "%s", response)
 }
 
 func main() {
