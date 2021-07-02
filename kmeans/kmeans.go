@@ -54,7 +54,7 @@ func decodeNode(array []string) (nNode []Node) {
 	}
 	return
 }
-func trainingEncode(nList []Node, nCentroids []Node, maxIter int) string {
+func TrainingEncode(nList []Node, nCentroids []Node, maxIter int) string {
 	sLong := toString(nList)
 	sCentroid := toString(nCentroids)
 	p := toInt(maxIter)
@@ -62,7 +62,7 @@ func trainingEncode(nList []Node, nCentroids []Node, maxIter int) string {
 	return sLong
 }
 
-func trainingDecode(sLong string) (recon []Node, newNCluster []Node, newNIter int) {
+func TrainingDecode(sLong string) (recon []Node, newNCluster []Node, newNIter int) {
 	deConvert := strings.Split(sLong, ";")
 	deNode := strings.Split(deConvert[0], ",")
 	deCluster := strings.Split(deConvert[1], ",")
@@ -74,16 +74,16 @@ func trainingDecode(sLong string) (recon []Node, newNCluster []Node, newNIter in
 	return
 }
 
-func KMeansInit(nList []Node, nClusters int, maxIter int) (bool, []Node) {
+func KMeansInit(nList []Node, nClusters int, maxIter int) (bool, []Node, []Node, int) {
 	lnList := len(nList)
 	if lnList < nClusters {
-		return false, nil
+		return false, nil, nil, 0
 	}
 	cons := 0
 	for i, Node := range nList {
 		nDims := len(Node)
 		if i > 0 && len(Node) != cons {
-			return false, nil
+			return false, nil, nil, 0
 		}
 		cons = nDims
 	}
@@ -99,7 +99,11 @@ func KMeansInit(nList []Node, nClusters int, maxIter int) (bool, []Node) {
 	}
 
 	//reemplazar v por encoding y llamada
-	return KMeansTraining(nList, nCentroids, maxIter)
+	//xreturn KMeansTraining(nList, nCentroids, maxIter)
+
+	//encode, send, wait, decode, poblar, retornar true, nCentroids
+
+	return true, nList, nCentroids, maxIter
 }
 
 func KMeansTraining(nList []Node, nCentroids []Node, maxIter int) (bool, []Node) {
